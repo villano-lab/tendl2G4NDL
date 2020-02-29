@@ -1,0 +1,43 @@
+#!/bin/bash
+
+#specify label if you wish
+LABEL=${3:-NONE}
+VAR=${4:-XXX}
+echo ${LABEL}
+echo ${VAR}
+
+NJOY_PATH=~/NJOY2016/bin/
+
+gunzip -c -k "$1" > "tape20"
+
+iso=`echo $1 | sed -E "s/.*[A-Z][a-z][0-9]([0-9][0-9]).*/\\1/"`
+iso1="$(((iso - 70)*3 + 25))"
+#FIXME assuming Ge for now, need to change regex and map "Ge" to Z if not
+iso=32${iso1}
+echo ${iso}
+
+echo "reconr
+ 20 21/
+ 'pendf tape for ${LABEL} variation ${VAR}'/
+ ${iso} 0/
+ .001/
+ 0/
+stop" > input
+
+cat input
+
+$NJOY_PATH/njoy < input
+
+python pendf2G4NDL.py
+
+mv output.txt ${1//.gz/-G4NDL}
+
+#to remove the zipping comment the pigz line and switch the mv line to the
+#one without the .zz extension
+pigz -z ${1//.gz/-G4NDL}
+#mv ${1//.gz/-G4NDL} $2
+mv ${1//.gz/-G4NDL.zz} $2
+
+rm input
+rm tape20
+rm tape21
