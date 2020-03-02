@@ -3,14 +3,14 @@
 MAX=${1:-0}
 EXE=${2:-echo}
 
-#get the isotopes list and date stamp that shit. 
-filename=GeIsoList-`date "+%Y-%m-%d-%H:%M:%S"`
-./getGeIsoList.sh > ${filename}
-
 #add one to MAX so it works with the head command 
 MAX="$((MAX+1))"
-#seq -f %03g 0 ${MAX} |awk -v exe=${EXE} '
-head -n ${MAX} ${filename} |awk -v exe=${EXE} '
+
+#get the isotopes list and date stamp that shit. 
+filename=GeIsoList-`date "+%Y-%m-%d-%H:%M:%S"`
+./getGeIsoList.sh |head -n ${MAX} > ${filename}
+
+cat ${filename} |awk -v exe=${EXE} '
 {
  system("echo mkdir -p random_xns/Random" $1"/Elastic/CrossSection");
  system("echo ./tendl2G4NDL ../neutron_file/Ge/Ge070/lib/endf/random/n-Ge070-rand-"$2".gz random_xns/Random"$1"/Elastic/CrossSection/32_70_Germanium.z n-Ge070 "$1);

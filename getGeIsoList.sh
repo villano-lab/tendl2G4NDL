@@ -5,7 +5,7 @@ ls ../neutron_file/Ge/Ge072/lib/endf/random/n-Ge072-rand-0* |sed -E "s/.*-([0-9]
 ls ../neutron_file/Ge/Ge073/lib/endf/random/n-Ge073-rand-0* |sed -E "s/.*-([0-9][0-9][0-9][0-9])(.gz)?.*/\\1/" > 73.txt
 ls ../neutron_file/Ge/Ge074/lib/endf/random/n-Ge074-rand-0* |sed -E "s/.*-([0-9][0-9][0-9][0-9])(.gz)?.*/\\1/" > 74.txt
 ls ../neutron_file/Ge/Ge076/lib/endf/random/n-Ge076-rand-0* |sed -E "s/.*-([0-9][0-9][0-9][0-9])(.gz)?.*/\\1/" > 76.txt
-seq 0 300 > seq.txt
+seq -f %03g 0 300 > seq.txt
 
 paste seq.txt 70.txt 72.txt 73.txt 74.txt 76.txt |awk '{if(NF==6){print "\t"$1"\t"$2"\t"$3"\t"$4"\t"$5"\t"$6}}'
 rm -f seq.txt
