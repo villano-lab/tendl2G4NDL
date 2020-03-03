@@ -1,5 +1,7 @@
 #!/bin/sh
 
+EXE=${1:-echo}
+
 #set the origin directory
 ODIR=/local/cdms/geant4.10.01.p02-install/share/Geant4-10.1.2/data/G4NDL4.5
 
@@ -13,23 +15,44 @@ find ${ODIR}/Elastic/ -type f |sed -E "s/.*(\/Elastic\/.*)(.z)?.*/\\1/"|grep -v 
 
 #cat grepout.txt
 #cat linkfiles.txt
-./linkthese.sh linkfiles.txt random_xns/Random0000/
 
 rm -f grepout.txt
-rm -f linkfiles.txt
 
 
 #find random_xns -maxdepth 3 -mindepth 3 -type f |grep 'Elastic\/'
 
-#| sed -E "s/.*(Random[0-9][0-9][0-9]).*/\\1/"
-find random_xns -maxdepth 1 -mindepth 1 -type d |sort |awk -v odir=${ODIR} '{
+#WARNING: the calls beyond this point are really hard to exit from
+#probably because they happen fast and spawn new processes; CTRL-C will not exit immediately,
+#use the "max" parameter to start with a small sample, say max=2. 
 
-  #system("echo ln -s "odir"/Capture "$0"/Capture");
-  #system("echo ln -s "odir"/Elastic/FS "$0"/Elastic/FS");
-  #system("echo ln -s "odir"/Fission "$0"/Fission");
-  #system("echo ln -s "odir"/Inelastic "$0"/Inelastic");
-  #system("echo ln -s "odir"/IsotopeProduction "$0"/IsotopeProduction");
-  #system("echo ln -s "odir"/JENDL_HE "$0"/JENDL_HE");
-  #system("echo ln -s "odir"/ThermalScattering "$0"/ThermalScattering");
+#set max to 999999999999 or something to be sure to do all of them
+#FIXME: maybe this script should just do one Random directory, with the directory name
+#as a second input. 
+find random_xns -maxdepth 1 -mindepth 1 -type d |sort |awk -v exe=${EXE} -v max=2 -v odir=${ODIR} '{
+
+  if(NR<max){
+    system("echo ln -s "odir"/Capture "$0"/Capture");
+    #dont need to link the fs files, they are linked individually
+    #system("echo ln -s "odir"/Elastic/FS "$0"/Elastic/FS");
+    system("echo ln -s "odir"/Fission "$0"/Fission");
+    system("echo ln -s "odir"/Inelastic "$0"/Inelastic");
+    system("echo ln -s "odir"/IsotopeProduction "$0"/IsotopeProduction");
+    system("echo ln -s "odir"/JENDL_HE "$0"/JENDL_HE");
+    system("echo ln -s "odir"/ThermalScattering "$0"/ThermalScattering");
+    system("./linkthese.sh linkfiles.txt "$0); 
+
+    if(exe=="exe"){
+      system("ln -s "odir"/Capture "$0"/Capture");
+      #dont need to link the fs files, they are linked individually
+      #system("ln -s "odir"/Elastic/FS "$0"/Elastic/FS");
+      system("ln -s "odir"/Fission "$0"/Fission");
+      system("ln -s "odir"/Inelastic "$0"/Inelastic");
+      system("ln -s "odir"/IsotopeProduction "$0"/IsotopeProduction");
+      system("ln -s "odir"/JENDL_HE "$0"/JENDL_HE");
+      system("ln -s "odir"/ThermalScattering "$0"/ThermalScattering");
+      system("./linkthese.sh linkfiles.txt "$0" exe"); 
+    }
+  }
 
 }'
+rm -f linkfiles.txt
